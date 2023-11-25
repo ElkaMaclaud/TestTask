@@ -5,11 +5,11 @@ import {
   getInputNumbersValue,
 } from "../utils/formattedNumberInput";
 
-const InputRange = () => {
+const InputRange = ({ value }) => {
   const minSumRef = useRef(null);
   const maxSumRef = useRef(null);
   const inputRangeRef = useRef(null);
-  const [values, setValues] = useState([100, 900]);
+  const [values, setValues] = useState([value.min, value.max]);
   const [isDraggingMin, setIsDraggingMin] = useState(false);
   const [isDraggingMax, setIsDraggingMax] = useState(false);
   const WIDTH = 24;
@@ -67,9 +67,9 @@ const InputRange = () => {
 
   useEffect(() => {
     setBackgroundColor(
-      `linear-gradient(to right, #FFECBB ${values[0]/9 + 12}px, #FDC840 ${
-        values[0]/9
-      }px ${values[1]/9 + 12}px, #FFECBB ${values[1]/9}px)`
+      `linear-gradient(to right, #FFECBB ${values[0] / 9 + 12}px, #FDC840 ${
+        values[0] / 9
+      }px ${values[1] / 9 + 12}px, #FFECBB ${values[1] / 9}px)`
     );
   }, [values]);
   useEffect(() => {
@@ -79,6 +79,7 @@ const InputRange = () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraggingMin, isDraggingMax]);
   const handleBlurMin = () => {
     setValues((prev) => {
@@ -94,7 +95,7 @@ const InputRange = () => {
   const handleBlurMax = () => {
     setValues((prev) => {
       if (prev[1] <= prev[0] && prev[1] !== null) {
-        return [prev[0], prev[0] + WIDTH*9];
+        return [prev[0], prev[0] + WIDTH * 9];
       } else if (prev[1] > 1584) {
         return [prev[0], 1584];
       } else {
@@ -102,46 +103,43 @@ const InputRange = () => {
       }
     });
   };
-  const onChangeMin = e => {
+  const onChangeMin = (e) => {
     const value = getInputNumbersValue(e.target.value);
     const max = values[1];
-    const thumbWidth = WIDTH*9;
-    if(value >= 0 && value <= max - thumbWidth) {
-      setValues(prev => [value, prev[1]]);
+    const thumbWidth = WIDTH * 9;
+    if (value >= 0 && value <= max - thumbWidth) {
+      setValues((prev) => [value, prev[1]]);
     } else if (value < 0) {
-      setValues(prev => [0, prev[1]]);
+      setValues((prev) => [0, prev[1]]);
     } else if (value > max - thumbWidth) {
-      setValues(prev => [max - thumbWidth, prev[1]]);
+      setValues((prev) => [max - thumbWidth, prev[1]]);
     }
-  }
-  
-  const onChangeMax = e => {
-    const value = getInputNumbersValue(e.target.value); 
+  };
+
+  const onChangeMax = (e) => {
+    const value = getInputNumbersValue(e.target.value);
     const min = values[0];
-    const thumbWidth = WIDTH*9;
-    if(value >= min + thumbWidth && value <= 1584) {
-      setValues(prev => [prev[0], value]);
+    const thumbWidth = WIDTH * 9;
+    if (value >= min + thumbWidth && value <= 1584) {
+      setValues((prev) => [prev[0], value]);
     } else if (value < min + thumbWidth) {
-      setValues(prev => [prev[0], min + thumbWidth]);
+      setValues((prev) => [prev[0], min + thumbWidth]);
     } else if (value > 1584) {
-      setValues(prev => [prev[0], 1584]);
-    }else setValues(prev => [prev[0], value]);
-  }
+      setValues((prev) => [prev[0], 1584]);
+    }
+  };
   return (
     <div className="wrapper">
       <div className="inputInputWrapper">
         <input
           type="text"
           value={currenciesFormatted(values[0])}
-          onFocus={(e) => setValues((prev) => [0, prev[1]])}
           onChange={onChangeMin}
           onBlur={handleBlurMin}
         />
         <input
           type="text"
           value={currenciesFormatted(values[1])}
-            onFocus={(e) =>
-              setValues((prev) => [prev[0], prev[1]])}
           onChange={onChangeMax}
           onBlur={handleBlurMax}
         />
