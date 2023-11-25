@@ -52,6 +52,9 @@ input[type="text"] {
   background-color: #FFECBB;
   border-radius: 30px;
 }
+.inputRange:focus {
+  outline: none;
+}
 .inputRoundFirst, .inputRoundSecond {
   position: absolute;
   width: 24px;

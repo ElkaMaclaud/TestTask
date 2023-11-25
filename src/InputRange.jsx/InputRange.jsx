@@ -5,11 +5,11 @@ import {
   getInputNumbersValue,
 } from "../utils/formattedNumberInput";
 
-const InputRange = ({ value }) => {
+const InputRange = ({ maxValue }) => {
   const minSumRef = useRef(null);
   const maxSumRef = useRef(null);
   const inputRangeRef = useRef(null);
-  const [values, setValues] = useState([value.min, value.max]);
+  const [values, setValues] = useState([100, 900]);
   const [isDraggingMin, setIsDraggingMin] = useState(false);
   const [isDraggingMax, setIsDraggingMax] = useState(false);
   const WIDTH = 24;
@@ -35,28 +35,22 @@ const InputRange = ({ value }) => {
       } else if (event.clientX > maxSum.x - WIDTH) {
         let offsetX = maxSum.x - rect.left - WIDTH;
         setValues((prev) => [offsetX * 9, prev[1]]);
-      } else if (event.clientX > rect.right - WIDTH) {
-        let offsetX = rect.right - rect.left - WIDTH;
-        setValues((prev) => [offsetX * 9, prev[1]]);
-      }
+      } 
     } else if (isDraggingMax) {
       if (
         event.clientX - WIDTH > minSum.x + WIDTH &&
         event.clientX + WIDTH < rect.right &&
-        event.clientX - WIDTH > rect.x + WIDTH
+        event.clientX > rect.x
       ) {
-        let offsetX = event.clientX - rect.left;
+        let offsetX = event.clientX - rect.left + 1;
         setValues((prev) => [prev[0], offsetX * 9]);
       } else if (event.clientX < minSum.x + WIDTH) {
         let offsetX = minSum.x - rect.left + WIDTH;
         setValues((prev) => [prev[0], offsetX * 9]);
-      } else if (event.clientX > rect.right - rect.left + WIDTH) {
+      } else if (event.clientX > rect.right + rect.left) {
         let offsetX = rect.right - rect.left - WIDTH;
         setValues((prev) => [prev[0], offsetX * 9]);
-      } else if (event.clientX < rect.x + WIDTH) {
-        let offsetX = rect.x - rect.left + WIDTH;
-        setValues((prev) => [prev[0], offsetX * 9]);
-      }
+      } 
     }
   };
 
@@ -96,8 +90,8 @@ const InputRange = ({ value }) => {
     setValues((prev) => {
       if (prev[1] <= prev[0] && prev[1] !== null) {
         return [prev[0], prev[0] + WIDTH * 9];
-      } else if (prev[1] > 1584) {
-        return [prev[0], 1584];
+      } else if (prev[1] > maxValue) {
+        return [prev[0], maxValue];
       } else {
         return [prev[0], prev[1]];
       }
@@ -120,12 +114,12 @@ const InputRange = ({ value }) => {
     const value = getInputNumbersValue(e.target.value);
     const min = values[0];
     const thumbWidth = WIDTH * 9;
-    if (value >= min + thumbWidth && value <= 1584) {
+    if (value >= min + thumbWidth && value <= maxValue) {
       setValues((prev) => [prev[0], value]);
     } else if (value < min + thumbWidth) {
       setValues((prev) => [prev[0], min + thumbWidth]);
-    } else if (value > 1584) {
-      setValues((prev) => [prev[0], 1584]);
+    } else if (value > maxValue) {
+      setValues((prev) => [prev[0], maxValue]);
     }
   };
   return (

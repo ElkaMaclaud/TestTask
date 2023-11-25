@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="app">
       <div className="container">
-        <InputRange value={{min:100, max: 900}}/>
+        <InputRange maxValue={1584}/>
       </div>
     </div>
   );
