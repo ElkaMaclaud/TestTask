@@ -13,44 +13,36 @@ const InputRange = ({ maxValue }) => {
   const [isDraggingMin, setIsDraggingMin] = useState(false);
   const [isDraggingMax, setIsDraggingMax] = useState(false);
   const WIDTH = 24;
-  const [backgroundColor, setBackgroundColor] = useState(
-    `linear-gradient(to right, #FFECBB ${values[0] + 12}px, #FDC840 ${
-      values[0]
-    }px ${values[1] + 12}px, #FFECBB ${values[1]}px)`
-  );
+  const [backgroundColor, setBackgroundColor] = useState(``);
   const handleMouseMove = (event) => {
     const rect = inputRangeRef.current.getBoundingClientRect();
     const minSum = minSumRef.current.getBoundingClientRect();
     const maxSum = maxSumRef.current.getBoundingClientRect();
+    const coordinateX = event.type === "mousemove" ? event.clientX : event.touches[0].clientX;
     if (isDraggingMin) {
-      if (
-        event.clientX >= rect.x &&
-        event.clientX <= maxSum.x - WIDTH &&
-        event.clientX <= rect.right - WIDTH
-      ) {
-        let offsetX = event.clientX - rect.left;
+      if (coordinateX >= rect.x && coordinateX <= maxSum.x - WIDTH) {
+        let offsetX = coordinateX - rect.left;
         setValues((prev) => [offsetX * 9, prev[1]]);
-      } else if (event.clientX < rect.x) {
+      } else if (coordinateX < rect.x) {
         setValues((prev) => [0, prev[1]]);
-      } else if (event.clientX > maxSum.x - WIDTH) {
+      } else if (coordinateX > maxSum.x - WIDTH) {
         let offsetX = maxSum.x - rect.left - WIDTH;
         setValues((prev) => [offsetX * 9, prev[1]]);
-      } 
+      }
     } else if (isDraggingMax) {
       if (
-        event.clientX - WIDTH > minSum.x + WIDTH &&
-        event.clientX + WIDTH < rect.right &&
-        event.clientX > rect.x
+        coordinateX >= minSum.x + WIDTH &&
+        coordinateX <= rect.right - WIDTH
       ) {
-        let offsetX = event.clientX - rect.left + 1;
+        let offsetX = coordinateX - rect.left;
         setValues((prev) => [prev[0], offsetX * 9]);
-      } else if (event.clientX < minSum.x + WIDTH) {
+      } else if (coordinateX < minSum.x + WIDTH) {
         let offsetX = minSum.x - rect.left + WIDTH;
         setValues((prev) => [prev[0], offsetX * 9]);
-      } else if (event.clientX > rect.right + rect.left) {
+      } else if (coordinateX > rect.right - WIDTH) {
         let offsetX = rect.right - rect.left - WIDTH;
         setValues((prev) => [prev[0], offsetX * 9]);
-      } 
+      }
     }
   };
 
@@ -67,13 +59,19 @@ const InputRange = ({ maxValue }) => {
     );
   }, [values]);
   useEffect(() => {
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    if (isDraggingMin || isDraggingMax) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("touchmove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchend", handleMouseUp);
+    }
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("touchmove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchend", handleMouseUp);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraggingMin, isDraggingMax]);
   const handleBlurMin = () => {
     setValues((prev) => {
@@ -128,18 +126,18 @@ const InputRange = ({ maxValue }) => {
         <input
           type="text"
           value={currenciesFormatted(values[0])}
-          onChange={onChangeMin}
+          onInput={onChangeMin}
           onBlur={handleBlurMin}
         />
         <input
           type="text"
           value={currenciesFormatted(values[1])}
-          onChange={onChangeMax}
+          onInput={onChangeMax}
           onBlur={handleBlurMax}
         />
       </div>
       <div className="inputRangeWrapper">
-        <input
+        <div
           style={{
             background: backgroundColor,
           }}
@@ -151,12 +149,14 @@ const InputRange = ({ maxValue }) => {
           ref={minSumRef}
           style={{ left: `${values[0] / 9}px` }}
           onMouseDown={() => setIsDraggingMin(true)}
+          onTouchStart={() => setIsDraggingMin(true)}
           className="inputRoundFirst"
         />
         <div
           ref={maxSumRef}
           style={{ left: `${values[1] / 9}px` }}
           onMouseDown={() => setIsDraggingMax(true)}
+          onTouchStart={() => setIsDraggingMax(true)}
           className="inputRoundSecond"
         />
       </div>
